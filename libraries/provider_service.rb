@@ -15,6 +15,7 @@ class ElasticsearchCookbook::ServiceProvider < Chef::Provider::LWRPBase
     es_user = find_es_resource(Chef.run_context, :elasticsearch_user, new_resource)
     es_install = find_es_resource(Chef.run_context, :elasticsearch_install, new_resource)
     es_conf = find_es_resource(Chef.run_context, :elasticsearch_configure, new_resource)
+    es_service = find_es_resource(Chef.run_context, :elasticsearch_service, new_resource)
     default_config_name = new_resource.service_name || new_resource.instance_name || es_conf.instance_name || 'elasticsearch'
 
     d_r = directory "#{es_conf.path_pid}-#{default_config_name}" do
@@ -72,7 +73,9 @@ class ElasticsearchCookbook::ServiceProvider < Chef::Provider::LWRPBase
           es_group: es_user.groupname,
           nofile_limit: es_conf.nofile_limit,
           install_type: es_install.type,
-          version: es_install.version
+          version: es_install.version,
+          restart_event: es_service.restart_event,
+          restart_interval: es_service.restart_interval
         )
         only_if 'which systemctl'
         action :nothing
